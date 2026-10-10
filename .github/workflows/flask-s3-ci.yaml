@@ -84,20 +84,20 @@ jobs:
             --tag flask-s3-test:${{ github.sha }} \
             flask-s3-service/
 
-    #   - name: Setup Node.js (for Snyk CLI)
-    #     uses: actions/setup-node@v4
-    #     with:
-    #       node-version: 22
+      - name: Setup Node.js (for Snyk CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-    #   - name: Install Snyk CLI
-    #     run: npm install -g snyk
+      - name: Install Snyk CLI
+        run: npm install -g snyk
 
-    #   - name: Authenticate Snyk
-    #     run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-    #   # Scan the newly built local image and Dockerfile for vulnerabilities
-    #   - name: Snyk Container Scan
-    #     run: |
-    #       snyk container test flask-s3-test:${{ github.sha }} \
-    #         --file=flask-s3-service/Dockerfile \
-    #         --severity-threshold=high
+      # Scan the newly built local image and Dockerfile for vulnerabilities
+      - name: Snyk Container Scan
+        run: |
+          snyk container test flask-s3-test:${{ github.sha }} \
+            --file=flask-s3-service/Dockerfile \
+            --severity-threshold=high
