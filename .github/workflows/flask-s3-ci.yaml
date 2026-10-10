@@ -1,4 +1,4 @@
-name: CI - Flask  Service
+name: CI - Flask S3 Service
 run-name: "CI - Flask S3 Service by @${{ github.actor }}"
 
 on:
