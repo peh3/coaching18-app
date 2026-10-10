@@ -24,18 +24,18 @@ jobs:
         uses: actions/checkout@v4
 
       # 1. Update dependency baseline on Snyk dashboard
-      - name: Setup Node.js (for Snyk CLI)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    #   - name: Setup Node.js (for Snyk CLI)
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 22
 
-      - name: Install Snyk CLI
-        run: npm install -g snyk
+    #   - name: Install Snyk CLI
+    #     run: npm install -g snyk
 
-      - name: Authenticate Snyk & Snapshot Dependencies
-        run: |
-          snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk monitor --file=flask-sqs-service/requirements.txt
+    #   - name: Authenticate Snyk & Snapshot Dependencies
+    #     run: |
+    #       snyk auth ${{ secrets.SNYK_TOKEN }}
+    #       snyk monitor --file=flask-sqs-service/requirements.txt
 
       # 2. Authenticate to AWS via OIDC
       - name: Configure AWS Credentials (OIDC)
