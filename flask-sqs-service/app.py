@@ -1,7 +1,7 @@
 import os
 import logging
 import boto3
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, jsonify
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,9 +15,7 @@ AWS_REGION = os.environ["AWS_REGION"]
 QUEUE_URL = os.environ["QUEUE_URL"]
 sqs_client = boto3.client("sqs", region_name=AWS_REGION)
 
-# Simple HTML form
-SQS_FORM = """
-<!DOCTYPE html>
+SQS_FORM = """<!DOCTYPE html>
 <html>
   <body>
     <h1>Send a Message to SQS</h1>
@@ -28,8 +26,7 @@ SQS_FORM = """
       <button type="submit">Send to SQS</button>
     </form>
   </body>
-</html>
-"""
+</html>"""
 
 @app.route("/send", methods=["GET", "POST"])
 def send():
@@ -39,7 +36,7 @@ def send():
     message = request.form.get("message")
     if not message:
         logger.warning("No message provided.")
-        return "No message provided.", 400
+        return jsonify({"error": "No message provided."}), 400
 
     try:
         response = sqs_client.send_message(
@@ -47,11 +44,16 @@ def send():
             MessageBody=message
         )
         message_id = response.get("MessageId", "N/A")
-        logger.info("Message '%s' sent to '%s' (MessageId: %s).", message, QUEUE_URL, message_id)
-        return f"Message sent to SQS! (MessageId: {message_id})"
+        logger.info("Message sent to '%s' (MessageId: %s).", QUEUE_URL, message_id)
+        
+        return jsonify({
+            "status": "success",
+            "message": "Message sent to SQS!",
+            "message_id": message_id
+        }), 200
     except Exception as exc:
         logger.exception("Error sending message to SQS.")
-        return f"Error sending message to SQS: {str(exc)}", 500
+        return jsonify({"error": str(exc)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002)
