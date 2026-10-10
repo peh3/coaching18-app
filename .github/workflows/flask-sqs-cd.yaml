@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'flask-sqs-service/**'
-      - '.github/workflows/cd-flask-sqs.yaml'
+      - '.github/workflows/flask-sqs-cd.yaml'
   workflow_dispatch:
 
 permissions:

@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'flask-s3-service/**'
-      - '.github/workflows/cd-flask-s3.yaml'
+      - '.github/workflows/flask-s3-cd.yaml'
   workflow_dispatch:
 
 permissions:
