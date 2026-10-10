@@ -1,0 +1,72 @@
+name: CD - Flask S3 Service
+run-name: "CD - Flask S3 Service by @${{ github.actor }}"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'flask-s3-service/**'
+      - '.github/workflows/flask-s3-cd.yaml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-s3-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting initiator name
+        run: echo "Workflow initiated by ${{ github.actor }} from branch ${{ github.ref_name }}"
+  
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Update dependency baseline on Snyk dashboard
+      - name: Setup Node.js (for Snyk CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Authenticate Snyk & Snapshot Dependencies
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk monitor --file=flask-s3-service/requirements.txt
+
+      # 2. Authenticate to AWS via OIDC
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.OIDC_ROLE }}
+          aws-region: us-east-1
+
+      # 3. Authenticate Docker to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Build and Push with SHA and latest tags
+      - name: Build, Tag, and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPO: tk-coaching18-flask-s3-service
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPO:latest \
+            flask-s3-service/
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPO:latest
+
+      # 5. Trigger rolling update on ECS Fargate
+      - name: Deploy to ECS Fargate
+        run: |
+          aws ecs update-service \
+            --cluster tk-coaching18-cluster \
+            --service tk-coaching18-flask-s3-service \
+            --force-new-deployment
