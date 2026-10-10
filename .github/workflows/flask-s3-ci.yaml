@@ -1,4 +1,5 @@
-name: CI - Flask S3 Service
+name: CI - Flask  Service
+run-name: "CI - Flask S3 Service by @${{ github.actor }}"
 
 on:
   pull_request:

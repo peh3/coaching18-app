@@ -1,4 +1,5 @@
 name: CD - Flask SQS Service
+run-name: "CD - Flask SQS Service by @${{ github.actor }}"
 
 on:
   push:

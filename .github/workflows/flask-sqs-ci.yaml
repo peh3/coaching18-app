@@ -1,4 +1,5 @@
 name: CI - Flask SQS Service
+run-name: "CI - Flask SQS Service by @${{ github.actor }}"
 
 on:
   pull_request:
