@@ -1,0 +1,7 @@
+._*
+**/.DS_Store
+**/._*
+__pycache__
+*.pyc
+.git
+.github
